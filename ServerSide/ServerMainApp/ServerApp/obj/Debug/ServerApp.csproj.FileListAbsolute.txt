@@ -1,0 +1,6 @@
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.exe.config
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.pdb
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.csprojResolveAssemblyReference.cache
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.pdb
