@@ -1,5 +1,0 @@
-U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.exe.config
-U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.exe
-U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.pdb
-U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.exe
-U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.pdb

@@ -1,0 +1,22 @@
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.exe.config
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\bin\Debug\ServerApp.pdb
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.csprojResolveAssemblyReference.cache
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\ServerMainApp\ServerApp\obj\Debug\ServerApp.pdb
+U:\ClassLibrary1\ServerApp\obj\Debug\ServerApp.csprojResolveAssemblyReference.cache
+U:\ClassLibrary1\ServerApp\bin\Debug\ServerApp.exe.config
+U:\ClassLibrary1\ServerApp\bin\Debug\ServerApp.exe
+U:\ClassLibrary1\ServerApp\bin\Debug\ServerApp.pdb
+U:\ClassLibrary1\ServerApp\bin\Debug\ClassLibrary1.dll
+U:\ClassLibrary1\ServerApp\bin\Debug\ClassLibrary1.pdb
+U:\ClassLibrary1\ServerApp\obj\Debug\ServerApp.exe
+U:\ClassLibrary1\ServerApp\obj\Debug\ServerApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\obj\Debug\ServerApp.csprojResolveAssemblyReference.cache
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\obj\Debug\ServerApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\obj\Debug\ServerApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\bin\Debug\ServerApp.exe.config
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\bin\Debug\ServerApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\bin\Debug\ServerApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\bin\Debug\ClassLibrary1.dll
+U:\Ete 2018\IFT585\TP1Telematique\ServerApp\bin\Debug\ClassLibrary1.pdb

@@ -1,6 +1,0 @@
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.exe.config
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.exe
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.pdb
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.exe
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.pdb
-U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.csprojResolveAssemblyReference.cache

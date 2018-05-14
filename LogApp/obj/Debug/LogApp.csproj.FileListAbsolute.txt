@@ -1,0 +1,22 @@
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.exe.config
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\bin\Debug\LogApp.pdb
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.exe
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.pdb
+U:\Été 2018\IFT585\TP1\ServerSide\LogApp\LogApp\obj\Debug\LogApp.csprojResolveAssemblyReference.cache
+U:\ClassLibrary1\LogApp\obj\Debug\LogApp.csprojResolveAssemblyReference.cache
+U:\ClassLibrary1\LogApp\obj\Debug\LogApp.exe
+U:\ClassLibrary1\LogApp\obj\Debug\LogApp.pdb
+U:\ClassLibrary1\LogApp\bin\Debug\LogApp.exe.config
+U:\ClassLibrary1\LogApp\bin\Debug\LogApp.exe
+U:\ClassLibrary1\LogApp\bin\Debug\LogApp.pdb
+U:\ClassLibrary1\LogApp\bin\Debug\ClassLibrary1.dll
+U:\ClassLibrary1\LogApp\bin\Debug\ClassLibrary1.pdb
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\bin\Debug\LogApp.exe.config
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\obj\Debug\LogApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\obj\Debug\LogApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\obj\Debug\LogApp.csprojResolveAssemblyReference.cache
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\bin\Debug\LogApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\bin\Debug\LogApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\bin\Debug\ClassLibrary1.dll
+U:\Ete 2018\IFT585\TP1Telematique\LogApp\bin\Debug\ClassLibrary1.pdb

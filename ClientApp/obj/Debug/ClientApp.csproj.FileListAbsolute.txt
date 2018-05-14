@@ -1,0 +1,24 @@
+U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.exe.config
+U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.exe
+U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.pdb
+U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.exe
+U:\Été 2018\IFT585\TP1\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ClientSide\ClientApp\ClientApp\bin\Debug\ClientApp.exe.config
+U:\Ete 2018\IFT585\TP1Telematique\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\ClientSide\ClientApp\ClientApp\obj\Debug\ClientApp.pdb
+U:\ClassLibrary1\ClientApp\obj\Debug\ClientApp.csprojResolveAssemblyReference.cache
+U:\ClassLibrary1\ClientApp\obj\Debug\ClientApp.exe
+U:\ClassLibrary1\ClientApp\obj\Debug\ClientApp.pdb
+U:\ClassLibrary1\ClientApp\bin\Debug\ClientApp.exe.config
+U:\ClassLibrary1\ClientApp\bin\Debug\ClientApp.exe
+U:\ClassLibrary1\ClientApp\bin\Debug\ClientApp.pdb
+U:\ClassLibrary1\ClientApp\bin\Debug\ClassLibrary1.dll
+U:\ClassLibrary1\ClientApp\bin\Debug\ClassLibrary1.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\obj\Debug\ClientApp.csprojResolveAssemblyReference.cache
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\obj\Debug\ClientApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\obj\Debug\ClientApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\bin\Debug\ClientApp.exe.config
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\bin\Debug\ClientApp.exe
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\bin\Debug\ClientApp.pdb
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\bin\Debug\ClassLibrary1.dll
+U:\Ete 2018\IFT585\TP1Telematique\ClientApp\bin\Debug\ClassLibrary1.pdb

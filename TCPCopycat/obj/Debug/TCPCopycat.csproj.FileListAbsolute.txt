@@ -1,0 +1,4 @@
+U:\Ete 2018\IFT585\TP1Telematique\TCPCopycat\bin\Debug\ClassLibrary1.dll
+U:\Ete 2018\IFT585\TP1Telematique\TCPCopycat\bin\Debug\ClassLibrary1.pdb
+U:\Ete 2018\IFT585\TP1Telematique\TCPCopycat\obj\Debug\ClassLibrary1.dll
+U:\Ete 2018\IFT585\TP1Telematique\TCPCopycat\obj\Debug\ClassLibrary1.pdb
