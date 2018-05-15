@@ -15,24 +15,24 @@ namespace TCPCopycat
         {
             byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
 
-            int nbPacket = fileBytes.Length / 1024 + 1;
+            int nbPacket = fileBytes.Length / maxBytePerPacket + 1;
 
             byte[][] ret = new byte[nbPacket][];
             
             for (int i = 0; i < nbPacket-1; ++i)
             {
-                ret[i] = new byte[1024];
-                for (int j = 0; j < 1024; ++j)
+                ret[i] = new byte[maxBytePerPacket];
+                for (int j = 0; j < maxBytePerPacket; ++j)
                 {
-                    ret[i][j] = fileBytes[i * 1024 + j];
+                    ret[i][j] = fileBytes[i * maxBytePerPacket + j];
                 }
             }
 
-            ret[nbPacket-1] = new byte[fileBytes.Length % 1024];
+            ret[nbPacket-1] = new byte[fileBytes.Length % maxBytePerPacket];
 
-            for (int i = 0; i < fileBytes.Length % 1024; i++)
+            for (int i = 0; i < fileBytes.Length % maxBytePerPacket; i++)
             {
-                ret[nbPacket - 1][i] = fileBytes[(nbPacket - 1) * 1024 + i];
+                ret[nbPacket - 1][i] = fileBytes[(nbPacket - 1) * maxBytePerPacket + i];
             }
 
 

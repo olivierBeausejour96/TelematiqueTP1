@@ -18,18 +18,13 @@ namespace ServerApp
         {
             Console.WriteLine("Main Server App");
             TCPCopyCatInterface instance = new TCPCopyCatInterface();
-            instance.killAllLogApps();
-            //instance.initializeListener(listenPort, true);
-
-
-            Socket qwe = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            instance.initialize(11000);
+            instance.startListening();
             
-            Console.ReadLine();
-
             do
             {
                 Console.WriteLine("Enter `q` to quit gracefully");
-            } while (Console.ReadLine() != "q");
+            } while (Console.ReadLine().ToLower() != "q");
 
             
 
