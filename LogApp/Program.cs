@@ -13,7 +13,6 @@ namespace LogApp
         static void Main(string[] args)
         {
             Console.WriteLine("LogApp");
-            TCPCopyCatInterface instance = new TCPCopyCatInterface();
             //instance.initializeListener(listenPort, false);
         }
     }

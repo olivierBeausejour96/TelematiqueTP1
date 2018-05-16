@@ -40,7 +40,7 @@ namespace TCPCopycat
 
             for (int i = 0; i < nbPacket; i++)
             {
-                copycatPacketArray[i] = new TCPCopycatPacket(new TCPCopycatPacket.Header { dataLenght = ret[i].Length, packetNumber = i }, ret[i]);
+                copycatPacketArray[i] = new TCPCopycatPacket(new TCPCopycatPacket.TCPCopycatHeader { dataLenght = ret[i].Length, sequenceNumber = i }, ret[i]);
             }
 
             return copycatPacketArray;

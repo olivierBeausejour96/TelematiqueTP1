@@ -17,17 +17,17 @@ namespace ServerApp
         static void Main(string[] args)
         {
             Console.WriteLine("Main Server App");
-            TCPCopyCatInterface instance = new TCPCopyCatInterface();
-            instance.initialize(11000);
-            instance.startListening();
+
+            TCPCopycatServerInterface instance = new TCPCopycatServerInterface();
+
+
+            instance.initializeServer(11000);
             
             do
             {
                 Console.WriteLine("Enter `q` to quit gracefully");
             } while (Console.ReadLine().ToLower() != "q");
-
             
-
             /*
             string data = "HelloWorld";
 
@@ -35,14 +35,17 @@ namespace ServerApp
             int sizeOfData = byteArrayData.Length;
             int packetNumber = 1;
 
-            TCPCopycatPacket qwe = new TCPCopycatPacket(new TCPCopycatPacket.Header { dataLenght = sizeOfData, packetNumber = packetNumber }, byteArrayData);
+            TCPCopycatPacket.TCPCopycatHeader tmpHeader = new TCPCopycatPacket.TCPCopycatHeader();
+            tmpHeader.sequenceNumber = packetNumber;
+            tmpHeader.dataLenght = sizeOfData;
+        
+            TCPCopycatPacket qwe = new TCPCopycatPacket(tmpHeader, byteArrayData);
 
-            byte[] parseByteArray = qwe.toByte();
+            byte[] parseByteArray = qwe.serialize();
 
             TCPCopycatPacket qwe2 = TCPCopycatPacket.parse(parseByteArray);
 
             string das = Encoding.UTF8.GetString(qwe2.data);
-
 
             TCPCopycatPacket[] asd = TCPCopycatPacketManager.FileToTCPCopycatPacket(@"C:\Users\beao3002\Desktop\qwe.zip");
 
