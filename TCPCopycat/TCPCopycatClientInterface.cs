@@ -6,25 +6,34 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace TCPCopycat
 {
     public class TCPCopycatClientInterface
     {
         Socket socket;
+        int windowSize;
+        TCPCopycatPacket[] filePackets;
         List<TCPCopycatReceiveMessageCallback> registeredCallbacks;
         IPEndPoint serverEndpoint;
+        private readonly object syncLock = new object();
+        int nextPacketInd = 0;
 
         Dictionary<int, TCPCopycatReceiveMessageCallback> dictionaryRegisteredPacket;
         Dictionary<int, TCPCopyCatController.responseCode> dictionaryRegisteredPacketResponse;
-        Dictionary<int, Timer> dictionaryTimer;
+        Dictionary<int, TaskTimer> dictionaryTimer;
+        Dictionary<int, TCPCopycatPacket> dictionaryPacket;
+
+        
 
         public TCPCopycatClientInterface()
         {
             registeredCallbacks = new List<TCPCopycatReceiveMessageCallback>();
             dictionaryRegisteredPacket = new Dictionary<int, TCPCopycatReceiveMessageCallback>();
             dictionaryRegisteredPacketResponse = new Dictionary<int, TCPCopyCatController.responseCode>();
-            dictionaryTimer = new Dictionary<int, Timer>();
+            dictionaryTimer = new Dictionary<int, TaskTimer>();
+            dictionaryPacket = new Dictionary<int, TCPCopycatPacket>();
         }
 
         public async Task<TCPCopyCatController.responseCode> connectToServer(IPAddress _IPAddress, int serverPort)
@@ -41,6 +50,7 @@ namespace TCPCopycat
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             else if (socket.IsBound)
                 throw new Exception("Already connected to another server!");
+            TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
 
             IPEndPoint test = new IPEndPoint(IPAddress.Loopback, 0);
             socket.Bind(test);
@@ -60,13 +70,14 @@ namespace TCPCopycat
             {
                 if (packet.header.SYN == 1 && packet.header.acknowledgeNumber == (connectionSequenceNumber + 1))
                 {
+                    this.serverEndpoint = sender;
                     return TCPCopyCatController.responseCode.OK;
                 }
                 return TCPCopyCatController.responseCode.UNKNOWN_ERROR;
             };
 
 
-            TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
+
             if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, connectionPacket))
             {
                 registerPacket(connectionPacket, receivedMessageCallbackLambda, 1000);
@@ -78,6 +89,7 @@ namespace TCPCopycat
             }
         }
 
+
         private void registerPacket(TCPCopycatPacket packet, TCPCopycatReceiveMessageCallback lambda, int waitTime)
         {
             if (waitTime < 0)
@@ -85,26 +97,64 @@ namespace TCPCopycat
                 throw new Exception("waitTime must be positive");
             }
 
-            dictionaryRegisteredPacket.Add(packet.header.sequenceNumber + 1, lambda);
-            dictionaryRegisteredPacketResponse.Add(packet.header.sequenceNumber + 1, TCPCopyCatController.responseCode.NONE);
-
-            TimerCallbackLambda timerCallbackLambda = delegate (object state)
+            Console.WriteLine("registering packet: " + packet.header.sequenceNumber);
+            if (dictionaryRegisteredPacket.ContainsKey(packet.header.sequenceNumber + 1))
             {
-                Console.WriteLine("in timer");
-                Timer t = (Timer)state;
+                dictionaryRegisteredPacket[packet.header.sequenceNumber + 1] = lambda;
+            }
+            else
+            {
+                dictionaryRegisteredPacket.Add(packet.header.sequenceNumber + 1, lambda);
+            }
+
+
+            setPacketResponse(packet.header.sequenceNumber + 1, TCPCopyCatController.responseCode.NONE);
+
+            ElapsedEventHandler timerCallbackLambda = delegate (object state, System.Timers.ElapsedEventArgs e)
+            {
+                TaskTimer t = (TaskTimer)state;
+                TCPCopycatPacket packetToSend = t.packetToSend;
+                TCPCopycatReceiveMessageCallback l = t.lambda;
+                int w = t.waitTime;
                 t.Dispose();
-                unregisterPacket(packet.header.sequenceNumber + 1);
-                dictionaryRegisteredPacketResponse[packet.header.sequenceNumber + 1] = TCPCopyCatController.responseCode.NO_RESPONSE;
+                if (dictionaryRegisteredPacketResponse[packetToSend.header.sequenceNumber+1] == TCPCopyCatController.responseCode.OK) //unregister timer is called before the timer is even initialized
+                    return;
+                Console.WriteLine("packet: " + packetToSend.header.sequenceNumber.ToString() + " lost");
+                unregisterPacket(packetToSend.header.sequenceNumber + 1);
+                setPacketResponse(packetToSend.header.sequenceNumber + 1, TCPCopyCatController.responseCode.NONE);
+                TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, packetToSend);
+                registerPacket(packetToSend, l, w);
             };
+            
 
+            TaskTimer timer = new TaskTimer();
 
-            Timer timer = new Timer(new TimerCallback(timerCallbackLambda));
-            timer.Change(waitTime, 0);
+            timer.Interval = waitTime; // set the interval as 10000 ms
+            timer.Elapsed += new System.Timers.ElapsedEventHandler(timerCallbackLambda); // set the event to execute
+            timer.AutoReset = false; // false: only execute once
+            timer.Enabled = true; // to decide if execute the event of timer specified
+
+            timer.packetToSend = packet;
+            timer.lambda = lambda;
+            timer.waitTime = waitTime;
+
 
             registerTimer(packet.header.sequenceNumber + 1, timer);
         }
 
-        private void registerTimer(int ack, Timer timer)
+        private void setPacketResponse(int ack, TCPCopyCatController.responseCode response)
+        {
+            if (dictionaryRegisteredPacketResponse.ContainsKey(ack))
+            {
+                dictionaryRegisteredPacketResponse[ack] = response;
+            }
+            else
+            {
+                dictionaryRegisteredPacketResponse.Add(ack, response);
+            }
+        }
+
+        private void registerTimer(int ack, TaskTimer timer)
         {
             if (!dictionaryTimer.ContainsKey(ack))
                 dictionaryTimer.Add(ack, timer);
@@ -155,10 +205,64 @@ namespace TCPCopycat
             return await task;
         }
 
-        public TCPCopyCatController.responseCode initiateFileTransfer()
+        public void initiateFileTransfer()
         {
-            return TCPCopyCatController.responseCode.NOT_IMPLEMENTED;
+            filePackets = TCPCopycatPacketManager.FileToTCPCopycatPacket(@"C:\Users\beao3002\Desktop\qwe.zip");
+            windowSize = 5;
+            int firstSeqNumber = 25;
+            sendFilePackets(windowSize, filePackets, firstSeqNumber);
         }
+
+
+        public void sendFilePackets(int windowSize, TCPCopycatPacket[] filePackets, int firstSeqNumber)
+        {
+            int i = 0;
+            while ( i < windowSize)
+            {
+                sendFilePacket(GetNextPacketToSend());
+                i++;
+            }
+        }
+
+        public void sendFilePacket(TCPCopycatPacket packet)
+        {
+            if (packet == null)
+                return;
+
+            if (packet.header.sequenceNumber == filePackets[filePackets.Length-1].header.sequenceNumber)
+            {
+                packet.header.FIN = 1;
+            }
+
+            packet.header.sequenceNumber += 25;
+
+            TCPCopycatReceiveMessageCallback receivedMessageCallbackLambda = delegate (TCPCopycatPacket _packet, IPEndPoint sender)
+            {
+                unregisterPacket(_packet.header.acknowledgeNumber);
+                sendFilePacket(GetNextPacketToSend());
+                return TCPCopyCatController.responseCode.OK;
+            };
+
+            Console.WriteLine("Sending file to port: " + serverEndpoint.Port.ToString());
+            if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, packet))
+            {
+                registerPacket(packet, receivedMessageCallbackLambda, 1000);
+            }
+        }
+
+        public TCPCopycatPacket GetNextPacketToSend()
+        {
+            lock (syncLock)
+            {
+                ++nextPacketInd;
+                if(nextPacketInd > filePackets.Length)
+                {
+                    return null;
+                }
+                return filePackets[nextPacketInd-1];
+            }
+        }
+
 
         public TCPCopyCatController.responseCode closeServerConnection()
         {

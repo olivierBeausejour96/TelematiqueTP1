@@ -123,6 +123,7 @@ namespace TCPCopycat
                 task.Start();
                 Timer timer = new Timer(new TimerCallback(timerCallbackLambda));
                 timer.Change(waitTime, 0);
+  
                 
                 try
                 {
