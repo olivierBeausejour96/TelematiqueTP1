@@ -12,19 +12,24 @@ namespace TCPCopycat
         Socket clientSocket;
         Dictionary<IPEndPoint, Socket> clientSockets;
         List<TCPCopycatPacket> filePacketList;
+        HashSet<int> packetReceived;
 
 
         public TCPCopycatServerInterface()
         {
             filePacketList = new List<TCPCopycatPacket>();
+            packetReceived = new HashSet<int>();
         }
 
         public void ClientSocketReceivedPacketCallback(TCPCopycatPacket packet, IPEndPoint sender)
         {
             Console.WriteLine("Received Packet numbered: " + packet.header.sequenceNumber.ToString());
 
-            if (!filePacketList.Contains(packet))
+            if (!packetReceived.Contains(packet.header.sequenceNumber))
+            {
                 filePacketList.Add(packet);
+                packetReceived.Add(packet.header.sequenceNumber);
+            }
 
             packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
             TCPCopyCatController.sendMessageToEndPoint(clientSocket, sender, packet);
