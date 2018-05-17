@@ -17,8 +17,9 @@ namespace ClientApp
         static void Main(string[] args)
         {
             Console.WriteLine("Client app");
-
-
+            TCPCopycatClientInterface client = new TCPCopycatClientInterface();
+            client.connectToServer(IPAddress.Loopback, serverListenPort);
+            Console.ReadLine();
         }
     }
 }

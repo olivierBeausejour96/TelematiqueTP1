@@ -31,15 +31,9 @@ namespace TCPCopycat
 
         private TCPCopyCatController() { }
 
-        public responseCode ConnectToServer(IPEndPoint endPoint)
-        {
-                   
-            return responseCode.OK;
-        }
-
         public responseCode serverProcessHandshake(IPEndPoint clientEndPoint)
         {
-            return responseCode.OK;
+            throw new NotImplementedException("LOL NOOB");
         }
 
         public static void startListenOnSocketAsync(Socket socket, ReceivedPacketCallback callbackLambda)
@@ -52,7 +46,7 @@ namespace TCPCopycat
                     {
                         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
                         EndPoint Remote = (EndPoint)sender;
-                        byte[] receive_byte_array = new byte[2048];
+                        byte[] receive_byte_array = new byte[1399];
                         socket.ReceiveFrom(receive_byte_array, ref Remote);
                         sender = (IPEndPoint)Remote;
 
@@ -68,17 +62,9 @@ namespace TCPCopycat
             taskA.Start();
         }
 
-        
-        public void onPacketReceive(IPEndPoint sender, byte[] data)
-        {
-            //dostuff
-        }
-
         public void sendMessageToEndPoint(Socket socket, IPEndPoint receiver, TCPCopycatPacket packet, TCPCopycatReceiveMessageCallback callbackLambda, int timeoutTime = 1000)
         {
             sendMessageToEndPoint(socket, receiver, packet);
-
-
         }
 
         public static bool sendMessageToEndPoint(Socket socket, IPEndPoint receiver, TCPCopycatPacket packet)
@@ -102,7 +88,7 @@ namespace TCPCopycat
             return exception_thrown;
         }
 
-        public void CloseServer()
+        public void CloseSocket()
         {
         }
 
@@ -111,6 +97,12 @@ namespace TCPCopycat
 
         }
 
+        /// <summary>
+        /// to be tested
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="waitTime"></param>
+        /// <returns></returns>
         public responseCode executeTimedRequest(Task<responseCode> task, int waitTime)
         {
             responseCode ret;
