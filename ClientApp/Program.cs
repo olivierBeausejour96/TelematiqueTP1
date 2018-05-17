@@ -16,6 +16,13 @@ namespace ClientApp
         private static string serverIP = "127.0.0.1";
 
         static void Main(string[] args)
+<<<<<<< HEAD
+        {
+            Console.WriteLine("Client app");
+            TCPCopycatClientInterface client = new TCPCopycatClientInterface();
+            client.connectToServer(IPAddress.Loopback, serverListenPort);
+            Console.ReadLine();
+=======
         {
             #region comments
             // Create a socket object. This is the fundamental device used to network
@@ -97,6 +104,7 @@ namespace ClientApp
         {
             Console.WriteLine("Please enter the server's ip adress");
             serverIP = GetUserInput();
+>>>>>>> 7c3e4b34dec250ab71f1ce9fefcaa306e1c06400
         }
     }
 }

@@ -25,8 +25,13 @@ namespace TCPCopycat
 
         public void ServerReceivedPacketCallback(TCPCopycatPacket packet, IPEndPoint sender)
         {
+            Console.WriteLine("Received new connection from " + sender.Address + " port: " + sender.Port);
+            Console.WriteLine("Loopback: " + IPAddress.Loopback.ToString() + " Any: " + IPAddress.Any.ToString());
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPEndPoint qwe = new IPEndPoint(IPAddress.Any, sender.Port);
+            clientSocket.Bind(qwe);
             clientSockets.Add(sender, clientSocket);
+            Console.WriteLine("holla");
             TCPCopyCatController.startListenOnSocketAsync(clientSocket, ClientSocketReceivedPacketCallback);
             packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
             TCPCopyCatController.sendMessageToEndPoint(clientSocket, sender, packet);
@@ -37,6 +42,7 @@ namespace TCPCopycat
             serversocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             serversocket.Bind(endpoint);
             clientSockets = new Dictionary<IPEndPoint, Socket>();
+            Console.WriteLine("Server Initialized");
 
             TCPCopyCatController.startListenOnSocketAsync(serversocket, ServerReceivedPacketCallback);
         }

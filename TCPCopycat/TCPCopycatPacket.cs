@@ -46,7 +46,8 @@ namespace TCPCopycat
 
         public Byte[] serialize()
         {
-            Byte[] binaryPacket = new byte[header.dataLenght + (
+            Byte[] binaryPacket = new byte[header.dataLenght + 
+                (
                 sizeof(int)     + //TCPCopycatHeader.dataLenght
                 sizeof(int)     + //TCPCopycatHeader.sequenceNumber
                 sizeof(int)     + //TCPCopycatHeader.acknowledgeNumber
