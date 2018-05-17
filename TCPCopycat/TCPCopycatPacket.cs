@@ -244,6 +244,37 @@ namespace TCPCopycat
             #endregion
 
             return new TCPCopycatPacket(header, data);
-        } 
+        }
+
+        public override string ToString()
+        {
+        //     public int dataLenght;          // size of data
+        //public int sequenceNumber;      // sequenceNumber seen in class
+        //public int acknowledgeNumber;   // acknowledgeNumber seen in class
+        //public Int16 windowSize;        // windowSize for SelectiveRepeat
+        //public Int16 options;           // command that can be communicated (IE. I'm about to send you a file)
+
+        //public byte OPT; // true -> Options are valid
+        //public byte ACK; // true -> acknowledgeNumber is valid
+        //public byte SYN; // used for handshake to initiate connections
+        //public byte FIN; // used to close connections
+
+        string tcpPacketStringValue = "Header: \n" +
+                    "  dataLenght: " + header.dataLenght + "\n" +
+                    "  sequenceNumber: " + header.sequenceNumber + "\n" +
+                    "  acknowledgeNumber: " + header.acknowledgeNumber + "\n" +
+                    "  windowSize: " + header.windowSize + "\n" +
+                    "  options: " + header.options + "\n" +
+                    "  OPT: " + header.OPT + "\n" +
+                    "  ACK: " + header.ACK + "\n" +
+                    "  SYN: " + header.SYN + "\n" +
+                    "  FIN: " + header.FIN + "\n\n" +
+                    "Data: \n";
+            for (int i = 0; i < data.Length; i++)
+            {
+                tcpPacketStringValue += "  byte" + i + ": " + data[i] + "\n";
+            }
+            return tcpPacketStringValue;
+        }
     }
 }
