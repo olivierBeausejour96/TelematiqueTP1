@@ -73,6 +73,7 @@ namespace TCPCopycat
 
             try
             {
+                Console.WriteLine("Sending packet: " + packet.header.acknowledgeNumber.ToString() + " to endpoint: " + receiver.Address.ToString() + ":" + receiver.Port.ToString());
                 socket.SendTo(packet.serialize(), receiver);
             }
             catch (Exception send_exception)

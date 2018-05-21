@@ -14,10 +14,14 @@ namespace TCPCopycat
     {
         Socket socket;
         int windowSize;
+        int windowLowerbound;
+        int windowHigherbound;
+        int sequenceNumberOffset;
         TCPCopycatPacket[] filePackets;
         List<TCPCopycatReceiveMessageCallback> registeredCallbacks;
         IPEndPoint serverEndpoint;
         private readonly object syncLock = new object();
+        private readonly object timerLock = new object();
         int nextPacketInd = 0;
 
         Dictionary<int, TCPCopycatReceiveMessageCallback> dictionaryRegisteredPacket;
@@ -49,7 +53,7 @@ namespace TCPCopycat
             if (socket == null)
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             else if (socket.IsBound)
-                throw new Exception("Already connected to another server!");
+                return await getPacketResponse(connectionSequenceNumber + 1);
             TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
 
             IPEndPoint test = new IPEndPoint(IPAddress.Loopback, 0);
@@ -106,6 +110,7 @@ namespace TCPCopycat
             {
                 dictionaryRegisteredPacket.Add(packet.header.sequenceNumber + 1, lambda);
             }
+            Console.WriteLine(dictionaryRegisteredPacket.Count.ToString() + " packets registered");
 
 
             setPacketResponse(packet.header.sequenceNumber + 1, TCPCopyCatController.responseCode.NONE);
@@ -178,7 +183,6 @@ namespace TCPCopycat
         {
             if (dictionaryRegisteredPacket.ContainsKey(packet.header.acknowledgeNumber))
             {
-                Console.WriteLine("in onPacketReceive");
                 dictionaryRegisteredPacketResponse[packet.header.acknowledgeNumber] = dictionaryRegisteredPacket[packet.header.acknowledgeNumber](packet, sender);
                 unregisterPacket(packet.header.acknowledgeNumber);
                 Console.WriteLine("Response: " + dictionaryRegisteredPacketResponse[packet.header.acknowledgeNumber].ToString());
@@ -208,14 +212,17 @@ namespace TCPCopycat
         public void initiateFileTransfer()
         {
             filePackets = TCPCopycatPacketManager.FileToTCPCopycatPacket(@"C:\Users\beao3002\Desktop\qwe.zip");
-            windowSize = 5;
-            int firstSeqNumber = 25;
-            sendFilePackets(windowSize, filePackets, firstSeqNumber);
+            windowSize = 4;
+            windowLowerbound = 26;
+            windowHigherbound = windowLowerbound + windowSize;
+            sequenceNumberOffset = 25;
+            sendFilePackets(filePackets);
         }
 
 
-        public void sendFilePackets(int windowSize, TCPCopycatPacket[] filePackets, int firstSeqNumber)
+        public void sendFilePackets(TCPCopycatPacket[] filePackets)
         {
+
             int i = 0;
             while ( i < windowSize)
             {
@@ -234,12 +241,16 @@ namespace TCPCopycat
                 packet.header.FIN = 1;
             }
 
-            packet.header.sequenceNumber += 25;
+            packet.header.sequenceNumber += sequenceNumberOffset;
 
             TCPCopycatReceiveMessageCallback receivedMessageCallbackLambda = delegate (TCPCopycatPacket _packet, IPEndPoint sender)
             {
                 unregisterPacket(_packet.header.acknowledgeNumber);
-                sendFilePacket(GetNextPacketToSend());
+
+                // this ensure we only send 10 files at a time and also respect the selective repeat structure
+                translateWindow();
+                
+                Console.WriteLine("Response for packet number: " + (_packet.header.acknowledgeNumber-1).ToString());
                 return TCPCopyCatController.responseCode.OK;
             };
 
@@ -267,6 +278,19 @@ namespace TCPCopycat
         public TCPCopyCatController.responseCode closeServerConnection()
         {
             return TCPCopyCatController.responseCode.NOT_IMPLEMENTED;
+        }
+
+        public void translateWindow()
+        {
+            Console.WriteLine("WindowLowerBound : " + windowLowerbound.ToString());
+            if (dictionaryRegisteredPacketResponse.ContainsKey(windowLowerbound) && dictionaryRegisteredPacketResponse[windowLowerbound] == TCPCopyCatController.responseCode.OK)
+            {
+                windowLowerbound++;
+                Console.WriteLine("new WindowLowerBound : " + windowLowerbound.ToString());
+                windowHigherbound++;
+                sendFilePacket(GetNextPacketToSend());
+                translateWindow();
+            }
         }
     }
 }

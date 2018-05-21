@@ -19,7 +19,8 @@ namespace ClientApp
         {
             Console.WriteLine("Client app");
             TCPCopycatClientInterface client = new TCPCopycatClientInterface();
-            client.connectToServer(IPAddress.Loopback, serverListenPort).Wait();
+            while (client.connectToServer(IPAddress.Loopback, serverListenPort).Result != TCPCopyCatController.responseCode.OK) ;
+
             client.initiateFileTransfer();
             Console.WriteLine("Done transfering");
             Console.ReadLine();

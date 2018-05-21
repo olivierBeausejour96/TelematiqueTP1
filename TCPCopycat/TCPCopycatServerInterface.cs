@@ -8,55 +8,63 @@ namespace TCPCopycat
 {
     public class TCPCopycatServerInterface
     {
+
         Socket serversocket;
-        Socket clientSocket;
         Dictionary<IPEndPoint, Socket> clientSockets;
-        List<TCPCopycatPacket> filePacketList;
-        HashSet<int> packetReceived;
+        Dictionary<Socket, List<TCPCopycatPacket>> filePacketList;
+        Dictionary<Socket, HashSet<int>> packetReceived;
+
 
 
         public TCPCopycatServerInterface()
         {
-            filePacketList = new List<TCPCopycatPacket>();
-            packetReceived = new HashSet<int>();
+            filePacketList = new Dictionary<Socket, List<TCPCopycatPacket>>();
+            packetReceived = new Dictionary<Socket, HashSet<int>>();
         }
 
         public void ClientSocketReceivedPacketCallback(TCPCopycatPacket packet, IPEndPoint sender)
         {
             Console.WriteLine("Received Packet numbered: " + packet.header.sequenceNumber.ToString());
 
-            if (!packetReceived.Contains(packet.header.sequenceNumber))
+            if (!packetReceived[GetClientSocketFromEndpoint(sender)].Contains(packet.header.sequenceNumber))
             {
-                filePacketList.Add(packet);
-                packetReceived.Add(packet.header.sequenceNumber);
+                if(packet.header.FIN == 1)
+                {
+                    Console.WriteLine("Packet FIN received");
+                }
+                filePacketList[GetClientSocketFromEndpoint(sender)].Add(packet);
+                packetReceived[GetClientSocketFromEndpoint(sender)].Add(packet.header.sequenceNumber);
             }
 
             packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
-            TCPCopyCatController.sendMessageToEndPoint(clientSocket, sender, packet);
+            TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
 
             if (packet.header.FIN == 1)
             {
-                filePacketList.Sort(delegate (TCPCopycatPacket a, TCPCopycatPacket b) 
+                filePacketList[GetClientSocketFromEndpoint(sender)].Sort(delegate (TCPCopycatPacket a, TCPCopycatPacket b) 
                 {
                     if (a.header.sequenceNumber < b.header.sequenceNumber)
                         return -1;
                     return 1;
                 });
                 
-                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"C:\Users\beao3002\Desktop\qwe2.zip", filePacketList.ToArray());
+                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"C:\Users\beao3002\Desktop\qwe2 " + sender.Port.ToString() + ".zip", filePacketList[GetClientSocketFromEndpoint(sender)].ToArray());
             }
         }
 
         public void ServerReceivedPacketCallback(TCPCopycatPacket packet, IPEndPoint sender)
         {
             Console.WriteLine("Received new connection from " + sender.Address + " port: " + sender.Port);
-            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+            clientSockets.Add(sender, new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp));
             IPEndPoint qwe = new IPEndPoint(sender.Address, 0);
-            clientSocket.Bind(qwe);
-            Console.WriteLine("Client socket listening on port: " + qwe.Port.ToString());
-            TCPCopyCatController.startListenOnSocketAsync(clientSocket, ClientSocketReceivedPacketCallback);
+            clientSockets[sender].Bind(qwe);
+            packetReceived.Add(GetClientSocketFromEndpoint(sender), new HashSet<int>());
+            filePacketList.Add(GetClientSocketFromEndpoint(sender), new List<TCPCopycatPacket>());
+            Console.WriteLine("Client socket listening on port: " + sender.Port.ToString());
+            TCPCopyCatController.startListenOnSocketAsync(GetClientSocketFromEndpoint(sender), ClientSocketReceivedPacketCallback);
             packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
-            TCPCopyCatController.sendMessageToEndPoint(clientSocket, sender, packet);
+            TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
         }
         public void initializeServer(int port)
         {
@@ -68,15 +76,23 @@ namespace TCPCopycat
 
             TCPCopyCatController.startListenOnSocketAsync(serversocket, ServerReceivedPacketCallback);
         }
+
+        public Socket GetClientSocketFromEndpoint(IPEndPoint endpoint)
+        {
+            if (clientSockets.ContainsKey(endpoint))
+            {
+                return clientSockets[endpoint];
+            }
+            return null;
+        }
+
         public TCPCopyCatController.responseCode ProcessHandShake(IPEndPoint clientEndpoint)
         {
-
             return TCPCopyCatController.responseCode.NOT_IMPLEMENTED;
         }
 
         public TCPCopyCatController.responseCode ProcessCloseConnection(Socket clientSocket)
         {
-
             return TCPCopyCatController.responseCode.NOT_IMPLEMENTED;
         }
     }
