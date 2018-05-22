@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace TCPCopycat
 {
@@ -37,8 +38,31 @@ namespace TCPCopycat
             }
 
             packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
-            TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
-
+            //TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+            /*
+            if (packet.header.acknowledgeNumber == 30)
+            {
+                Console.WriteLine("********** SENDING MULTIPLE TIME SAME PACKET *************");
+                latency(250, 1251);
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+                latency(250, 1251);
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+                latency(250, 1251);
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+            }*/
+            if (packet.header.acknowledgeNumber != 28)
+            {
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+            }
+            if (packet.header.acknowledgeNumber == 31)
+            {
+                Console.WriteLine("*** GoingTo send packet 30 ack ***");
+                Thread.Sleep(10000);
+                packet.header.acknowledgeNumber = 28;
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+                Console.WriteLine("*** SENT PACKET ***");
+            }
+            
             if (packet.header.FIN == 1)
             {
                 filePacketList[GetClientSocketFromEndpoint(sender)].Sort(delegate (TCPCopycatPacket a, TCPCopycatPacket b) 
@@ -94,6 +118,13 @@ namespace TCPCopycat
         public TCPCopyCatController.responseCode ProcessCloseConnection(Socket clientSocket)
         {
             return TCPCopyCatController.responseCode.NOT_IMPLEMENTED;
+        }
+
+        public void latency(int min, int max)
+        {
+            Random rnd = new Random(123);
+            int rndNb = rnd.Next(min, max);
+            Thread.Sleep(rndNb);
         }
     }
 }

@@ -11,17 +11,39 @@ namespace ClientApp
 {
     class Program
     {
-        private const int serverListenPort = 11000;
-        private static bool terminateProgram = false;
-        private static string serverIP = "127.0.0.1";
 
         static void Main(string[] args)
         {
             Console.WriteLine("Client app");
-            TCPCopycatClientInterface client = new TCPCopycatClientInterface();
-            while (client.connectToServer(IPAddress.Loopback, serverListenPort).Result != TCPCopyCatController.responseCode.OK) ;
 
-            client.initiateFileTransfer();
+            string fileToSend = @"C:\Users\beao3002\Desktop\qwe.zip";
+            IPAddress serverIP = IPAddress.Loopback;
+            int serverPort = 11000;
+
+            if (args.Length != 0)
+            {
+                if (args.Length == 2)
+                {
+                    string[] qwe = args[0].Split(':');
+                    serverIP = IPAddress.Parse(qwe[0]);
+                    serverPort = Int32.Parse(qwe[1]);
+
+                    fileToSend = args[1];
+                }
+                else
+                {
+                    Console.WriteLine("Bad number of args");
+                    Console.WriteLine("Exiting app");
+                    return;
+                }
+            }
+
+            TCPCopycatClientInterface client = new TCPCopycatClientInterface();
+            while (client.connectToServer(IPAddress.Loopback, serverPort).Result != TCPCopyCatController.responseCode.OK);
+
+
+
+            client.sendFile(fileToSend);
             Console.WriteLine("Done transfering");
             Console.ReadLine();
         }
