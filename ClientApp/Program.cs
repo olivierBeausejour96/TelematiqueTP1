@@ -17,7 +17,7 @@ namespace ClientApp
             Console.WriteLine("Client app");
 
             string fileToSend = @"C:\Users\beao3002\Desktop\qwe.zip";
-            IPAddress serverIP = IPAddress.Loopback;
+            IPAddress serverIP = IPAddress.Parse("10.44.88.119");//IPAddress.Loopback;
             int serverPort = 11000;
 
             if (args.Length != 0)
@@ -25,6 +25,8 @@ namespace ClientApp
                 if (args.Length == 2)
                 {
                     string[] qwe = args[0].Split(':');
+                    Console.WriteLine(qwe[0]);
+                    Console.WriteLine(qwe[1]);
                     serverIP = IPAddress.Parse(qwe[0]);
                     serverPort = Int32.Parse(qwe[1]);
 
@@ -38,8 +40,10 @@ namespace ClientApp
                 }
             }
 
+
+            Console.WriteLine("");
             TCPCopycatClientInterface client = new TCPCopycatClientInterface();
-            while (client.connectToServer(IPAddress.Loopback, serverPort).Result != TCPCopyCatController.responseCode.OK);
+            while (client.connectToServer(serverIP, serverPort).Result != TCPCopyCatController.responseCode.OK);
 
 
 
