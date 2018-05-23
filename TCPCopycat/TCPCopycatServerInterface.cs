@@ -73,7 +73,7 @@ namespace TCPCopycat
                     return 1;
                 });
                 
-                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"C:\Users\beao3002\Desktop\qwe2 " + sender.Port.ToString() + ".zip", filePacketList[GetClientSocketFromEndpoint(sender)].ToArray());
+                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"C:\Users\dupm2617\Desktop\qwe2 " + sender.Port.ToString() + ".zip", filePacketList[GetClientSocketFromEndpoint(sender)].ToArray());
             }
         }
 
@@ -82,7 +82,7 @@ namespace TCPCopycat
             Console.WriteLine("Received new connection from " + sender.Address + " port: " + sender.Port);
 
             clientSockets.Add(sender, new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp));
-            IPEndPoint qwe = new IPEndPoint(sender.Address, 0);
+            IPEndPoint qwe = new IPEndPoint(IPAddress.Any, 0);
             clientSockets[sender].Bind(qwe);
             packetReceived.Add(GetClientSocketFromEndpoint(sender), new HashSet<int>());
             filePacketList.Add(GetClientSocketFromEndpoint(sender), new List<TCPCopycatPacket>());
