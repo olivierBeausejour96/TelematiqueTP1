@@ -20,8 +20,22 @@ namespace ServerApp
 
             TCPCopycatServerInterface instance = new TCPCopycatServerInterface();
 
+            int port = 11000;
 
-            instance.initializeServer(11000);
+            if (args.Length == 1)
+            {
+                port = Int32.Parse(args[0]);
+            }
+            else if (args.Length > 1)
+            {
+                Console.WriteLine("ServerApp.exe takes 1 or 0 parameter");
+                Console.WriteLine("Closing app");
+                return;
+            }
+
+            Console.WriteLine("Initializing server on port " + port.ToString());
+
+            instance.initializeServer(port);
             
             do
             {

@@ -73,6 +73,7 @@ namespace TCPCopycat
 
             try
             {
+                //Console.WriteLine("Sending packet: " + packet.header.acknowledgeNumber.ToString() + " to endpoint: " + receiver.Address.ToString() + ":" + receiver.Port.ToString());
                 socket.SendTo(packet.serialize(), receiver);
             }
             catch (Exception send_exception)
@@ -123,6 +124,7 @@ namespace TCPCopycat
                 task.Start();
                 Timer timer = new Timer(new TimerCallback(timerCallbackLambda));
                 timer.Change(waitTime, 0);
+  
                 
                 try
                 {

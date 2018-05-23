@@ -12,8 +12,7 @@ namespace LogApp
         private const int listenPort = 11001;
         static void Main(string[] args)
         {
-            Console.WriteLine("LogApp");
-            //instance.initializeListener(listenPort, false);
+            Console.WriteLine("LogApp"); 
         }
     }
 }
