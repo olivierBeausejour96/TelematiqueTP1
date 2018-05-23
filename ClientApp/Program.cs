@@ -39,7 +39,7 @@ namespace ClientApp
             }
 
             TCPCopycatClientInterface client = new TCPCopycatClientInterface();
-            while (client.connectToServer(IPAddress.Loopback, serverPort).Result != TCPCopyCatController.responseCode.OK);
+            while (client.connectToServer(serverIP, serverPort).Result != TCPCopyCatController.responseCode.OK);
 
 
 
