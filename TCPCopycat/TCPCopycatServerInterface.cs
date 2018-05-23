@@ -73,7 +73,7 @@ namespace TCPCopycat
                     return 1;
                 });
                 
-                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"C:\Users\dupm2617\Desktop\qwe2 " + sender.Port.ToString() + ".zip", filePacketList[GetClientSocketFromEndpoint(sender)].ToArray());
+                TCPCopycatPacketManager.TCPCopycatPacketArrayToFile(@"./" + sender.Port.ToString() , filePacketList[GetClientSocketFromEndpoint(sender)].ToArray());
             }
         }
 
