@@ -50,19 +50,20 @@ namespace TCPCopycat
                 latency(250, 1251);
                 TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
             }*/
-            //if (packet.header.acknowledgeNumber != 28)
-            //{
-            //    TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
-            //}
-            //if (packet.header.acknowledgeNumber == 31)
-            //{
-            //    Console.WriteLine("*** GoingTo send packet 30 ack ***");
-            //    Thread.Sleep(10000);
-            //    packet.header.acknowledgeNumber = 28;
-            //    TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
-            //    Console.WriteLine("*** SENT PACKET ***");
-            //}
-            
+            /*
+            if (packet.header.acknowledgeNumber != 28)
+            {
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+            }
+            if (packet.header.acknowledgeNumber == 31)
+            {
+                Console.WriteLine("*** GoingTo send packet 30 ack ***");
+                Thread.Sleep(10000);
+                packet.header.acknowledgeNumber = 28;
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+                Console.WriteLine("*** SENT PACKET ***");
+            }
+            */
             if (packet.header.FIN == 1)
             {
                 filePacketList[GetClientSocketFromEndpoint(sender)].Sort(delegate (TCPCopycatPacket a, TCPCopycatPacket b) 

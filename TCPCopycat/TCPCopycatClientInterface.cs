@@ -56,7 +56,7 @@ namespace TCPCopycat
                 return await getPacketResponse(connectionSequenceNumber + 1);
             TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
 
-            IPEndPoint test = new IPEndPoint(IPAddress.Loopback, 0);
+            IPEndPoint test = new IPEndPoint(IPAddress.Any, 0);
             socket.Bind(test);
 
             this.serverEndpoint = serverEndpoint;
