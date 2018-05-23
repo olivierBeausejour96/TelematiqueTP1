@@ -15,7 +15,6 @@ namespace ClientApp
         static void Main(string[] args)
         {
             Console.WriteLine("Client app");
-
             string fileToSend = @"C:\Users\beao3002\Desktop\qwe.zip";
             IPAddress serverIP = IPAddress.Parse("10.44.88.119");//IPAddress.Loopback;
             int serverPort = 11000;
