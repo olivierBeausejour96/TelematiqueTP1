@@ -11,6 +11,10 @@ namespace TCPCopycat
 
         private static int MAXIMUM_PACKET_SIZE = 1400;
 
+        public static int OPTION_NONE       = 0x0;
+        public static int OPTION_UPLOAD     = 0x1;
+        public static int OPTION_DOWNLOAD   = 0x2;
+
         public enum TCPCopycatPacketOptions
         {
             NO_OPTION = 0,
@@ -38,6 +42,12 @@ namespace TCPCopycat
         {
             header = h;
             data = d;
+        }
+
+        public void setOptions(Int16 options)
+        {
+            this.header.OPT = 1;
+            this.header.options = options;
         }
 
         public TCPCopycatPacket()

@@ -12,14 +12,17 @@ namespace TCPCopycat
 {
     public class TCPCopycatClientInterface
     {
-        Socket socket;
+
+
+        public Socket socket;
+        private string fileName;
         int windowSize;
         int windowLowerbound;
         int windowHigherbound;
         int sequenceNumberOffset;
         TCPCopycatPacket[] filePackets;
         List<TCPCopycatReceiveMessageCallback> registeredCallbacks;
-        IPEndPoint serverEndpoint;
+        public IPEndPoint serverEndpoint;
         private readonly object syncLock = new object();
         private readonly object timerLock = new object();
         int nextPacketInd = 0;
@@ -28,6 +31,10 @@ namespace TCPCopycat
         Dictionary<int, TCPCopyCatController.responseCode> dictionaryRegisteredPacketResponse;
         Dictionary<int, TaskTimer> dictionaryTimer;
         Dictionary<int, TCPCopycatPacket> dictionaryPacket;
+
+
+
+        TCPCopycatServerInterface serverInstance;
 
         
 
@@ -40,56 +47,114 @@ namespace TCPCopycat
             dictionaryPacket = new Dictionary<int, TCPCopycatPacket>();
         }
 
-        public async Task<TCPCopyCatController.responseCode> connectToServer(IPAddress _IPAddress, int serverPort)
+        public async Task<TCPCopyCatController.responseCode> connectToServer(IPAddress _IPAddress, int serverPort, int options, string fileToSend = "")
         {
             IPEndPoint serverEndPoint = new IPEndPoint(_IPAddress, serverPort);
-            return await connectToServer(serverEndPoint);
+            fileName = fileToSend;
+            return await connectToServer(serverEndPoint, options);
         }
 
-        public async Task<TCPCopyCatController.responseCode> connectToServer(IPEndPoint serverEndpoint)
+        public async Task<TCPCopyCatController.responseCode> connectToServer(IPEndPoint serverEndpoint, int options)
         {
-            const int connectionSequenceNumber = 0;
-
-            if (socket == null)
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            else if (socket.IsBound)
-                return await getPacketResponse(connectionSequenceNumber + 1);
-            TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
 
             IPEndPoint test = new IPEndPoint(IPAddress.Any, 0);
-            socket.Bind(test);
 
             this.serverEndpoint = serverEndpoint;
 
-            TCPCopycatPacket.TCPCopycatHeader header = new TCPCopycatPacket.TCPCopycatHeader();
-
-            header.SYN = 1;
-            header.sequenceNumber = connectionSequenceNumber;
-            header.ACK = 0;
-            header.dataLenght = 0;
-
-            TCPCopycatPacket connectionPacket = new TCPCopycatPacket(header, new byte[1]);
-
-            TCPCopycatReceiveMessageCallback receivedMessageCallbackLambda = delegate (TCPCopycatPacket packet, IPEndPoint sender)
+            if ((options & TCPCopycatPacket.OPTION_UPLOAD) != 0)
             {
-                if (packet.header.SYN == 1 && packet.header.acknowledgeNumber == (connectionSequenceNumber + 1))
+                const int connectionSequenceNumber = 0;
+
+                if (socket == null)
+                    socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                else if (socket.IsBound)
+                    return await getPacketResponse(connectionSequenceNumber + 1);
+                socket.Bind(test);
+                TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
+
+                TCPCopycatPacket.TCPCopycatHeader header = new TCPCopycatPacket.TCPCopycatHeader();
+
+                header.SYN = 1;
+                header.sequenceNumber = connectionSequenceNumber;
+                header.ACK = 0;
+                header.dataLenght = 0;
+
+                TCPCopycatPacket connectionPacket = new TCPCopycatPacket(header, new byte[1]);
+                connectionPacket.setOptions((Int16)(TCPCopycatPacket.OPTION_NONE | TCPCopycatPacket.OPTION_UPLOAD));
+
+                TCPCopycatReceiveMessageCallback receivedMessageCallbackLambda = delegate (TCPCopycatPacket packet, IPEndPoint sender)
                 {
-                    this.serverEndpoint = sender;
-                    return TCPCopyCatController.responseCode.OK;
+                    if (packet.header.SYN == 1 && packet.header.acknowledgeNumber == (connectionSequenceNumber + 1))
+                    {
+                        this.serverEndpoint = sender;
+                        return TCPCopyCatController.responseCode.OK;
+                    }
+                    return TCPCopyCatController.responseCode.UNKNOWN_ERROR;
+                };
+
+
+
+                if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, connectionPacket))
+                {
+                    registerPacket(connectionPacket, receivedMessageCallbackLambda, 1000);
+                    return await getPacketResponse(connectionSequenceNumber + 1);
                 }
-                return TCPCopyCatController.responseCode.UNKNOWN_ERROR;
-            };
-
-
-
-            if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, connectionPacket))
+                else
+                {
+                    return TCPCopyCatController.responseCode.BAD_REQUEST;
+                }
+            }
+            else if ((options & TCPCopycatPacket.OPTION_DOWNLOAD) != 0)
             {
-                registerPacket(connectionPacket, receivedMessageCallbackLambda, 1000);
-                return await getPacketResponse(connectionSequenceNumber + 1);
+                serverInstance = new TCPCopycatServerInterface();
+
+                socket = serverInstance.serversocket;
+
+                const int connectionSequenceNumber = 0;
+                if (socket == null)
+                    socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                else if (socket.IsBound)
+                    return await getPacketResponse(connectionSequenceNumber + 1);
+                socket.Bind(test);
+
+
+                TCPCopycatReceiveMessageCallback receivedMessageCallbackLambda = delegate (TCPCopycatPacket packet, IPEndPoint sender)
+                {
+                    serverInstance.AddClient(sender, socket);
+
+                    serverInstance.ClientSocketReceivedPacketCallback(packet, sender);
+
+                    return TCPCopyCatController.responseCode.OK;
+                };
+
+                TCPCopyCatController.startListenOnSocketAsync(socket, onPacketReceive);
+
+                TCPCopycatPacket.TCPCopycatHeader header = new TCPCopycatPacket.TCPCopycatHeader();
+
+                header.SYN = 1;
+                header.sequenceNumber = connectionSequenceNumber;
+                header.ACK = 0;
+
+                byte[] fileNameBytes = Encoding.ASCII.GetBytes(fileName);
+                header.dataLenght = fileNameBytes.Length;
+                TCPCopycatPacket connectionPacket = new TCPCopycatPacket(header, fileNameBytes);
+                connectionPacket.setOptions((Int16)(TCPCopycatPacket.OPTION_NONE | TCPCopycatPacket.OPTION_DOWNLOAD));
+
+                if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, connectionPacket))
+                {
+                    registerPacket(connectionPacket, receivedMessageCallbackLambda, 1000);
+                    return await getPacketResponse(connectionSequenceNumber + 1);
+                }
+                else
+                {
+                    return TCPCopyCatController.responseCode.BAD_REQUEST;
+                }
+
             }
             else
             {
-                return TCPCopyCatController.responseCode.BAD_REQUEST;
+                Console.WriteLine("Unrecognized option");
+                throw new Exception("Not a valid option parameter");
             }
         }
 
@@ -181,16 +246,19 @@ namespace TCPCopycat
 
         public void onPacketReceive(TCPCopycatPacket packet, IPEndPoint sender)
         {
-            Console.WriteLine("---Received packet number: " + (packet.header.acknowledgeNumber - 1).ToString());
+            Console.WriteLine("---Received packet number: " + packet.header.sequenceNumber.ToString());
             if (dictionaryRegisteredPacket.ContainsKey(packet.header.acknowledgeNumber))
             {
                 dictionaryRegisteredPacketResponse[packet.header.acknowledgeNumber] = dictionaryRegisteredPacket[packet.header.acknowledgeNumber](packet, sender);
                 unregisterPacket(packet.header.acknowledgeNumber);
-                Console.WriteLine("Response: " + dictionaryRegisteredPacketResponse[packet.header.acknowledgeNumber].ToString());
             }
             else
             {
-                Console.WriteLine("************** Already received packet " + (packet.header.sequenceNumber).ToString() + " ***********");
+                //Console.WriteLine("---ClientServerPacketReceived: " + (packet.header.sequenceNumber).ToString());
+                if (serverInstance != null)
+                {
+                    serverInstance.ClientSocketReceivedPacketCallback(packet, sender);
+                }
             }
         }
 
@@ -214,9 +282,10 @@ namespace TCPCopycat
             return await task;
         }
 
-        public void sendFile(string filePath)
+        public void sendFile(string filePath, int firstack = 0)
         {
             filePackets = TCPCopycatPacketManager.FileToTCPCopycatPacket(@filePath);
+            filePackets[0].header.acknowledgeNumber = firstack;
             windowSize = 10;
             windowLowerbound = 25;
             windowHigherbound = windowLowerbound + windowSize;
@@ -272,9 +341,9 @@ namespace TCPCopycat
                 return TCPCopyCatController.responseCode.OK;
             };
 
-            //Console.WriteLine("Sending file to port: " + serverEndpoint.Port.ToString());
             if (!TCPCopyCatController.sendMessageToEndPoint(socket, serverEndpoint, packet))
             {
+                Console.WriteLine("registering file packet" + packet.header.sequenceNumber.ToString());
                 registerPacket(packet, receivedMessageCallbackLambda, 2500);
             }
         }

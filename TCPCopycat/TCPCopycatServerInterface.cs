@@ -10,10 +10,11 @@ namespace TCPCopycat
     public class TCPCopycatServerInterface
     {
 
-        Socket serversocket;
+        public Socket serversocket;
         Dictionary<IPEndPoint, Socket> clientSockets;
         Dictionary<Socket, List<TCPCopycatPacket>> filePacketList;
         Dictionary<Socket, HashSet<int>> packetReceived;
+        public TCPCopycatClientInterface clientInstance;
 
 
 
@@ -21,6 +22,7 @@ namespace TCPCopycat
         {
             filePacketList = new Dictionary<Socket, List<TCPCopycatPacket>>();
             packetReceived = new Dictionary<Socket, HashSet<int>>();
+            clientSockets = new Dictionary<IPEndPoint, Socket>();
         }
 
         public void ClientSocketReceivedPacketCallback(TCPCopycatPacket packet, IPEndPoint sender)
@@ -81,22 +83,62 @@ namespace TCPCopycat
         {
             Console.WriteLine("Received new connection from " + sender.Address + " port: " + sender.Port);
 
-            clientSockets.Add(sender, new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp));
-            IPEndPoint qwe = new IPEndPoint(IPAddress.Any, 0);
-            clientSockets[sender].Bind(qwe);
-            packetReceived.Add(GetClientSocketFromEndpoint(sender), new HashSet<int>());
-            filePacketList.Add(GetClientSocketFromEndpoint(sender), new List<TCPCopycatPacket>());
-            Console.WriteLine("Client socket listening on port: " + sender.Port.ToString());
-            TCPCopyCatController.startListenOnSocketAsync(GetClientSocketFromEndpoint(sender), ClientSocketReceivedPacketCallback);
-            packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
-            TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+            if (packet.header.OPT != 0)
+            {
+                clientSockets.Add(sender, new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp));
+                IPEndPoint qwe = new IPEndPoint(IPAddress.Any, 0);
+                clientSockets[sender].Bind(qwe);
+                Console.WriteLine("Client socket listening on port: " + sender.Port.ToString());
+                packet.header.acknowledgeNumber = packet.header.sequenceNumber + 1;
+                TCPCopyCatController.sendMessageToEndPoint(GetClientSocketFromEndpoint(sender), sender, packet);
+
+                if ((packet.header.options & TCPCopycatPacket.OPTION_UPLOAD) != 0)
+                {
+                    Console.WriteLine("Client upload initiated");
+                    packetReceived.Add(GetClientSocketFromEndpoint(sender), new HashSet<int>());
+                    filePacketList.Add(GetClientSocketFromEndpoint(sender), new List<TCPCopycatPacket>());
+                    TCPCopyCatController.startListenOnSocketAsync(GetClientSocketFromEndpoint(sender), ClientSocketReceivedPacketCallback);
+
+                }
+                else if ((packet.header.options & TCPCopycatPacket.OPTION_DOWNLOAD) != 0)
+                {
+                    Console.WriteLine("Client download initiated");
+                    clientInstance = new TCPCopycatClientInterface();
+                    clientInstance.serverEndpoint = sender;
+
+                    if (clientInstance.socket == null)
+                        clientInstance.socket = clientSockets[sender];
+                    else if (clientInstance.socket.IsBound)
+                        return;
+
+                    TCPCopyCatController.startListenOnSocketAsync(clientInstance.socket, clientInstance.onPacketReceive);
+                    string result = System.Text.Encoding.UTF8.GetString(packet.data);
+
+                    clientInstance.sendFile(result, packet.header.sequenceNumber+1);                    
+                }
+                else
+                {
+                    Console.WriteLine("Unrecognized option");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No options received on connect. Expected at least one");
+            }
+           
+        }
+
+        public void AddClient(IPEndPoint client, Socket socket)
+        {
+            clientSockets.Add(client, socket);
+            packetReceived.Add(GetClientSocketFromEndpoint(client), new HashSet<int>());
+            filePacketList.Add(GetClientSocketFromEndpoint(client), new List<TCPCopycatPacket>());
         }
         public void initializeServer(int port)
         {
             IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
             serversocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             serversocket.Bind(endpoint);
-            clientSockets = new Dictionary<IPEndPoint, Socket>();
             Console.WriteLine("Server Initialized");
 
             TCPCopyCatController.startListenOnSocketAsync(serversocket, ServerReceivedPacketCallback);
@@ -108,6 +150,7 @@ namespace TCPCopycat
             {
                 return clientSockets[endpoint];
             }
+            Console.WriteLine("************* ERROR");
             return null;
         }
 
